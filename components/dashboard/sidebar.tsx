@@ -8,7 +8,9 @@ import {
   LayoutDashboard,
   Store,
   BarChart3,
+  QrCode,
   Settings,
+  CreditCard,
   LogOut,
   ChevronLeft,
   X,
@@ -18,7 +20,8 @@ import { useAuth } from "@/hooks/use-auth";
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/restaurants", label: "Restaurants", icon: Store },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, badge: "Soon" },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -101,11 +104,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               >
                 <Icon className="h-5 w-5 shrink-0" />
                 {!collapsed && <span>{item.label}</span>}
-                {!collapsed && item.badge && (
-                  <span className="ml-auto rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
-                    {item.badge}
-                  </span>
-                )}
               </Link>
             );
           })}

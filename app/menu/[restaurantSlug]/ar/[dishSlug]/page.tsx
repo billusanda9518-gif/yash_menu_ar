@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ARModelViewer } from "@/components/menu/ar-model-viewer";
+import { ARTracker } from "@/components/menu/ar-tracker";
 
 type Props = {
   params: Promise<{ restaurantSlug: string; dishSlug: string }>;
@@ -64,6 +65,9 @@ export default async function ARPage({ params }: Props) {
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl">
+      {/* Analytics tracking */}
+      <ARTracker restaurantId={restaurant.id} dishId={dish.id} dishName={dish.name} />
+
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 sm:px-6">
         <Link

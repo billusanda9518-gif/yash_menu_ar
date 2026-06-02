@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CategoryNav } from "@/components/menu/category-nav";
 import { DishCard } from "@/components/menu/dish-card";
+import { MenuTracker } from "@/components/menu/menu-tracker";
 import type { Restaurant, MenuCategory, Dish } from "@/lib/types";
 
 type Props = { params: Promise<{ restaurantSlug: string }> };
@@ -75,6 +76,9 @@ export default async function CustomerMenuPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-4xl px-4 pb-12">
+      {/* Analytics tracking */}
+      <MenuTracker restaurantId={restaurant.id} />
+
       {/* Restaurant header */}
       <header className="pb-6 pt-8 text-center">
         {restaurant.logo_url && (

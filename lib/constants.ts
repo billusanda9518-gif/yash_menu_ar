@@ -25,8 +25,8 @@ export const PLANS: Record<SubscriptionPlan, PlanLimits> = {
     max_dishes: 10,
     max_branches: 1,
     max_staff: 2,
-    ar_models: false,
-    analytics: false,
+    ar_models: true,
+    analytics: true,
     custom_domain: false,
     priority_support: false,
   },
@@ -94,12 +94,13 @@ export const ROUTES = {
   BRANCHES: (restaurantId: string) => `/dashboard/restaurants/${restaurantId}/branches` as const,
   STAFF: (restaurantId: string) => `/dashboard/restaurants/${restaurantId}/staff` as const,
   ANALYTICS: (restaurantId: string) => `/dashboard/restaurants/${restaurantId}/analytics` as const,
+  QR_CODES: (restaurantId: string) => `/dashboard/restaurants/${restaurantId}/qr` as const,
   SETTINGS: '/dashboard/settings',
   BILLING: '/dashboard/billing',
 
   // Public menu
   PUBLIC_MENU: (slug: string) => `/menu/${slug}` as const,
-  AR_VIEW: (slug: string, dishId: string) => `/ar/${slug}/${dishId}` as const,
+  AR_VIEW: (slug: string, dishSlug: string) => `/menu/${slug}/ar/${dishSlug}` as const,
 
   // API
   API_AUTH_CALLBACK: '/api/auth/callback',

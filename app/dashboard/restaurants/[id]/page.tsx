@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Store, UtensilsCrossed, Grid3X3, Settings, ArrowLeft, ExternalLink, Plus,
+  Store, UtensilsCrossed, Grid3X3, Settings, ArrowLeft, ExternalLink, Plus, QrCode,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { StatsCard } from "@/components/dashboard/stats-card";
@@ -62,6 +62,7 @@ export default function RestaurantDetailPage({ params }: Props) {
   const quickLinks = [
     { href: `/dashboard/restaurants/${id}/menu`, label: "Menu", icon: UtensilsCrossed, desc: "Manage dishes" },
     { href: `/dashboard/restaurants/${id}/categories`, label: "Categories", icon: Grid3X3, desc: "Organize menu" },
+    { href: `/dashboard/restaurants/${id}/qr`, label: "QR Codes", icon: QrCode, desc: "Generate & download" },
     { href: `/dashboard/restaurants/${id}/settings`, label: "Settings", icon: Settings, desc: "Restaurant info" },
   ];
 
@@ -105,7 +106,7 @@ export default function RestaurantDetailPage({ params }: Props) {
         {/* Quick links */}
         <div>
           <h2 className="mb-4 text-lg font-semibold text-white">Manage</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {quickLinks.map((link) => {
               const Icon = link.icon;
               return (

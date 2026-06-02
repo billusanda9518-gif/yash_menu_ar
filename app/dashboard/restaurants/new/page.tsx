@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,15 +11,37 @@ import { createClient } from "@/lib/supabase/client";
 import { createRestaurantSchema } from "@/lib/validations/restaurant";
 import { generateSlug } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { Upload, Store } from "lucide-react";
+import { useSubscription } from "@/hooks/use-subscription";
+import { Upload, Store, Crown, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function NewRestaurantPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { plan, limits, canCreateRestaurant, loading: subLoading } = useSubscription();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [restaurantCount, setRestaurantCount] = useState<number | null>(null);
+  const [atLimit, setAtLimit] = useState(false);
+
+  useEffect(() => {
+    async function checkLimit() {
+      const supabase = createClient();
+      const { count } = await supabase
+        .from("restaurants")
+        .select("id", { count: "exact", head: true });
+      const currentCount = count || 0;
+      setRestaurantCount(currentCount);
+      if (!canCreateRestaurant(currentCount)) {
+        setAtLimit(true);
+      }
+    }
+    if (!subLoading) {
+      checkLimit();
+    }
+  }, [subLoading, canCreateRestaurant]);
 
   const [form, setForm] = useState({
     name: "",
@@ -122,6 +145,42 @@ export default function NewRestaurantPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // ─── Plan Limit Gate ──────────────────────────────────────────────────────
+  if (atLimit) {
+    return (
+      <>
+        <DashboardHeader
+          title="Create Restaurant"
+          description="Add a new restaurant to your account"
+          onMenuToggle={() => {}}
+        />
+        <div className="mx-auto max-w-lg p-4 sm:p-6 lg:p-8">
+          <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-zinc-900 via-zinc-900 to-orange-950/20 p-8 text-center shadow-xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/10">
+              <Crown className="h-8 w-8 text-orange-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Restaurant limit reached</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              Your <Badge variant="secondary" className="mx-1 capitalize">{plan}</Badge> plan allows{" "}
+              <span className="font-semibold text-white">{limits.max_restaurants}</span>{" "}
+              restaurant{limits.max_restaurants === 1 ? "" : "s"}.
+              You currently have <span className="font-semibold text-white">{restaurantCount}</span>.
+            </p>
+            <p className="mt-4 text-sm text-zinc-500">
+              Upgrade your plan to create more restaurants and unlock premium features.
+            </p>
+            <Link href="/dashboard/billing">
+              <Button className="mt-6">
+                Upgrade Plan
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (
