@@ -98,18 +98,24 @@ export default function NewRestaurantPage() {
       let logoUrl = "";
 
       if (logoFile) {
-        const ext = logoFile.name.split(".").pop();
-        const path = `${user.id}/${form.slug}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from("restaurant-logos")
-          .upload(path, logoFile, { upsert: true });
+        try {
+          const ext = logoFile.name.split(".").pop();
+          const path = `${user.id}/${form.slug}.${ext}`;
+          const { error: uploadError } = await supabase.storage
+            .from("restaurant-logos")
+            .upload(path, logoFile, { upsert: true });
 
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from("restaurant-logos")
-          .getPublicUrl(path);
-        logoUrl = urlData.publicUrl;
+          if (uploadError) {
+            console.warn("Logo upload failed, creating restaurant without logo:", uploadError.message);
+          } else {
+            const { data: urlData } = supabase.storage
+              .from("restaurant-logos")
+              .getPublicUrl(path);
+            logoUrl = urlData.publicUrl;
+          }
+        } catch (uploadErr) {
+          console.warn("Logo upload error, continuing without logo:", uploadErr);
+        }
       }
 
       const { data, error } = await supabase

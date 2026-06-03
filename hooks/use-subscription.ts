@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { PLANS, type PlanLimits } from '@/lib/constants';
 import type { Subscription, SubscriptionPlan } from '@/lib/types';
@@ -22,7 +22,8 @@ export function useSubscription(): UseSubscriptionReturn {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient();
+  // Memoize the Supabase client so it's stable across renders
+  const supabase = useMemo(() => createClient(), []);
 
   const fetchSubscription = useCallback(async () => {
     try {
