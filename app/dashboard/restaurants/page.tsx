@@ -13,18 +13,23 @@ import { showToast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
 import type { Restaurant } from "@/lib/types";
 
+import { useAuth } from "@/hooks/use-auth";
+
 export default function RestaurantsPage() {
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Restaurant | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   async function fetchRestaurants() {
+    if (!user) return;
     try {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("restaurants")
         .select("*")
+        .eq("owner_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -38,8 +43,12 @@ export default function RestaurantsPage() {
   }
 
   useEffect(() => {
-    fetchRestaurants();
-  }, []);
+    if (user) {
+      (async () => {
+        await fetchRestaurants();
+      })();
+    }
+  }, [user]);
 
   async function handleDelete() {
     if (!deleteTarget) return;

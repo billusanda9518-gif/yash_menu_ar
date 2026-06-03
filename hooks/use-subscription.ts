@@ -58,7 +58,9 @@ export function useSubscription(): UseSubscriptionReturn {
   }, [supabase]);
 
   useEffect(() => {
-    fetchSubscription();
+    (async () => {
+      await fetchSubscription();
+    })();
   }, [fetchSubscription]);
 
   const plan: SubscriptionPlan = subscription?.plan ?? 'free';

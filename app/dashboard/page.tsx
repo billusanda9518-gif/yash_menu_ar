@@ -11,23 +11,50 @@ import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [stats, setStats] = useState({ restaurants: 0, dishes: 0, categories: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
+      if (!user) return;
       try {
         const supabase = createClient();
-        const [restaurantRes, dishRes, categoryRes] = await Promise.all([
-          supabase.from("restaurants").select("id", { count: "exact", head: true }),
-          supabase.from("dishes").select("id", { count: "exact", head: true }),
-          supabase.from("menu_categories").select("id", { count: "exact", head: true }),
-        ]);
+        
+        // 1. Get user's restaurants
+        const { data: userRestaurants, error: rErr } = await supabase
+          .from("restaurants")
+          .select("id")
+          .eq("owner_id", user.id);
+        
+        if (rErr) throw rErr;
+        
+        const restaurantCount = userRestaurants?.length || 0;
+        let dishCount = 0;
+        let categoryCount = 0;
+        
+        if (restaurantCount > 0) {
+          const restaurantIds = userRestaurants.map((r) => r.id);
+          
+          const [dishRes, categoryRes] = await Promise.all([
+            supabase
+              .from("dishes")
+              .select("id", { count: "exact", head: true })
+              .in("restaurant_id", restaurantIds),
+            supabase
+              .from("menu_categories")
+              .select("id", { count: "exact", head: true })
+              .in("restaurant_id", restaurantIds),
+          ]);
+          
+          dishCount = dishRes.count || 0;
+          categoryCount = categoryRes.count || 0;
+        }
+
         setStats({
-          restaurants: restaurantRes.count || 0,
-          dishes: dishRes.count || 0,
-          categories: categoryRes.count || 0,
+          restaurants: restaurantCount,
+          dishes: dishCount,
+          categories: categoryCount,
         });
       } catch (err) {
         console.error("Failed to fetch stats", err);
@@ -35,8 +62,10 @@ export default function DashboardPage() {
         setLoading(false);
       }
     }
-    fetchStats();
-  }, []);
+    if (user) {
+      fetchStats();
+    }
+  }, [user]);
 
   return (
     <>

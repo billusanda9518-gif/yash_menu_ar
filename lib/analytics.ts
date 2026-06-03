@@ -66,7 +66,7 @@ export function generateSessionId(): string {
 /*  Event batching & flushing                                          */
 /* ------------------------------------------------------------------ */
 
-let eventQueue: AnalyticsEvent[] = [];
+const eventQueue: AnalyticsEvent[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 const FLUSH_DELAY_MS = 2_000;
 const MAX_BATCH_SIZE = 50;

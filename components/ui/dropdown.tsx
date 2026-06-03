@@ -91,8 +91,7 @@ function Dropdown({ children, className }: DropdownProps) {
 /*  DropdownTrigger                                                    */
 /* ------------------------------------------------------------------ */
 
-export interface DropdownTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+export type DropdownTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 function DropdownTrigger({
   children,

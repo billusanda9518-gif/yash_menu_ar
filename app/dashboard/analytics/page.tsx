@@ -175,7 +175,9 @@ export default function AnalyticsPage() {
   }, [range, selectedRestaurant]);
 
   useEffect(() => {
-    fetchAnalytics();
+    (async () => {
+      await fetchAnalytics();
+    })();
   }, [fetchAnalytics]);
 
   const statCards = stats

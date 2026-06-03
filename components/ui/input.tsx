@@ -30,10 +30,9 @@ function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-let counter = 0;
 function useStableId(explicitId?: string) {
-  const ref = React.useRef(explicitId ?? `input-${++counter}`);
-  return explicitId ?? ref.current;
+  const reactId = React.useId();
+  return explicitId ?? reactId;
 }
 
 /* ------------------------------------------------------------------ */

@@ -28,20 +28,22 @@ export default function NewRestaurantPage() {
 
   useEffect(() => {
     async function checkLimit() {
+      if (!user) return;
       const supabase = createClient();
       const { count } = await supabase
         .from("restaurants")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id);
       const currentCount = count || 0;
       setRestaurantCount(currentCount);
       if (!canCreateRestaurant(currentCount)) {
         setAtLimit(true);
       }
     }
-    if (!subLoading) {
+    if (!subLoading && user) {
       checkLimit();
     }
-  }, [subLoading, canCreateRestaurant]);
+  }, [subLoading, user, canCreateRestaurant]);
 
   const [form, setForm] = useState({
     name: "",

@@ -59,12 +59,14 @@ export function ARModelViewer({ src, alt, iosSrc }: ModelViewerProps) {
   const viewerRef = useRef<ModelViewerElement | null>(null);
   const [arStatus, setArStatus] = useState<ARStatus>("loading");
   const [arMessage, setArMessage] = useState("");
-  const [modelSrc, setModelSrc] = useState(src);
   const [iosModelSrc, setIosModelSrc] = useState<string | undefined>(undefined);
-  const [arModes, setArModes] = useState("scene-viewer");
-  const [sceneViewer3dUrl, setSceneViewer3dUrl] = useState("");
-  const [isAndroid16Plus, setIsAndroid16Plus] = useState(false);
   const [isLaunchingAr, setIsLaunchingAr] = useState(false);
+
+  const profile = useMemo(() => getDeviceProfile(), []);
+  const modelSrc = useMemo(() => toAbsoluteAssetUrl(src), [src]);
+  const arModes = profile.arModes;
+  const isAndroid16Plus = profile.isAndroid && profile.androidVersion >= 16;
+  const sceneViewer3dUrl = useMemo(() => buildSceneViewerUrl(modelSrc, alt, "3d_preferred"), [modelSrc, alt]);
 
   const candidateIosSrc = useMemo(() => {
     if (iosSrc) return iosSrc;
@@ -75,25 +77,26 @@ export function ARModelViewer({ src, alt, iosSrc }: ModelViewerProps) {
   useEffect(() => { void import("@google/model-viewer"); }, []);
 
   useEffect(() => {
-    const absoluteModelSrc = toAbsoluteAssetUrl(src);
-    const profile = getDeviceProfile();
-    setModelSrc(absoluteModelSrc);
-    setArModes(profile.arModes);
-    setIsAndroid16Plus(profile.isAndroid && profile.androidVersion >= 16);
-    setSceneViewer3dUrl(buildSceneViewerUrl(absoluteModelSrc, alt, "3d_preferred"));
-    setArStatus("loading");
-    setArMessage(
-      profile.preferWebXR
-        ? 'Android 16 detected: use "View in AR (Chrome)" — Scene Viewer may close instantly.'
-        : ""
-    );
-    setIosModelSrc(undefined);
-    if (!candidateIosSrc) return;
-    const absoluteIosSrc = toAbsoluteAssetUrl(candidateIosSrc);
-    void fetch(absoluteIosSrc, { method: "HEAD" })
-      .then((r) => { if (r.ok) setIosModelSrc(absoluteIosSrc); })
-      .catch(() => { setIosModelSrc(undefined); });
-  }, [alt, candidateIosSrc, src]);
+    (async () => {
+      setArStatus("loading");
+      setArMessage(
+        profile.preferWebXR
+          ? 'Android 16 detected: use "View in AR (Chrome)" — Scene Viewer may close instantly.'
+          : ""
+      );
+      setIosModelSrc(undefined);
+      if (!candidateIosSrc) return;
+      const absoluteIosSrc = toAbsoluteAssetUrl(candidateIosSrc);
+      try {
+        const r = await fetch(absoluteIosSrc, { method: "HEAD" });
+        if (r.ok) {
+          setIosModelSrc(absoluteIosSrc);
+        }
+      } catch {
+        setIosModelSrc(undefined);
+      }
+    })();
+  }, [candidateIosSrc, profile.preferWebXR]);
 
   const handleViewInAR = async () => {
     const viewer = viewerRef.current;

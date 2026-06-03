@@ -350,17 +350,17 @@ export default function BillingPage() {
     try {
       const supabase = createClient();
 
-      // Get restaurant count (filtered by user_id)
+      // Get restaurant count (filtered by owner_id)
       const { count: restaurantCount } = await supabase
         .from("restaurants")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .eq("owner_id", user.id);
 
       // Get all restaurant IDs for the user to query dishes
       const { data: userRestaurants } = await supabase
         .from("restaurants")
         .select("id")
-        .eq("user_id", user.id);
+        .eq("owner_id", user.id);
 
       let dishCount = 0;
       if (userRestaurants && userRestaurants.length > 0) {
@@ -385,7 +385,9 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (user) {
-      fetchUsage();
+      (async () => {
+        await fetchUsage();
+      })();
     }
   }, [user, fetchUsage]);
 

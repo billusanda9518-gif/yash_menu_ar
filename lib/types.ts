@@ -134,6 +134,7 @@ export interface Subscription {
   cancel_at_period_end: boolean;
   stripe_subscription_id: string | null;
   stripe_customer_id: string | null;
+  stripe_price_id: string | null;
   created_at: string;
   updated_at: string;
 }

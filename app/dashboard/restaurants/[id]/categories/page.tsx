@@ -26,7 +26,7 @@ export default function CategoriesPage({ params }: Props) {
 
   const [form, setForm] = useState({ name: "", description: "", sort_order: 0 });
 
-  async function fetchCategories() {
+  const fetchCategories = useCallback(async () => {
     try {
       const supabase = createClient();
       const { data, error } = await supabase
@@ -41,9 +41,13 @@ export default function CategoriesPage({ params }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [restaurantId]);
 
-  useEffect(() => { fetchCategories(); }, [restaurantId]);
+  useEffect(() => {
+    (async () => {
+      await fetchCategories();
+    })();
+  }, [fetchCategories]);
 
   function openCreate() {
     setEditing(null);
