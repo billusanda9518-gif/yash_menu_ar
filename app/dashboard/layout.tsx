@@ -15,7 +15,10 @@ export default function DashboardLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  console.log(`[DashboardLayout] Render: user=${user?.email || 'None'}, loading=${loading}`);
+
   if (loading) {
+    console.log("loading started");
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
@@ -23,7 +26,11 @@ export default function DashboardLayout({
     );
   }
 
+  console.log("loading finished");
+  console.log("auth state", user);
+
   if (!user) {
+    console.log("redirecting to login");
     router.push("/login");
     return null;
   }

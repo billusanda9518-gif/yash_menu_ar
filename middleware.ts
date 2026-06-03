@@ -1,25 +1,33 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
-/**
- * Next.js middleware that:
- * 1. Refreshes the Supabase auth session on every matched request.
- * 2. Redirects unauthenticated users away from /dashboard/* to /login.
- * 3. Redirects authenticated users away from /login, /signup to /dashboard.
- */
 export async function middleware(request: NextRequest) {
   const { response, user } = await updateSession(request);
-
   const { pathname } = request.nextUrl;
+
+  console.log(`[Middleware] Path: ${pathname}, User: ${user ? user.email : 'None'}`);
 
   // Protected routes — require authentication
   if (pathname.startsWith('/dashboard')) {
     if (!user) {
+      console.log(`[Middleware] Unauthorized access to ${pathname}, redirecting to login`);
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = '/login';
-      // Preserve the originally requested URL so we can redirect back after login
       loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
+      
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      // Copy refreshed session cookies to the redirect response
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, {
+          path: cookie.path,
+          domain: cookie.domain,
+          maxAge: cookie.maxAge,
+          secure: cookie.secure,
+          httpOnly: cookie.httpOnly,
+          sameSite: cookie.sameSite,
+        });
+      });
+      return redirectResponse;
     }
   }
 
@@ -27,9 +35,23 @@ export async function middleware(request: NextRequest) {
   const authPages = ['/login', '/signup'];
   if (authPages.includes(pathname)) {
     if (user) {
+      console.log(`[Middleware] Authenticated user on ${pathname}, redirecting to dashboard`);
       const dashboardUrl = request.nextUrl.clone();
       dashboardUrl.pathname = '/dashboard';
-      return NextResponse.redirect(dashboardUrl);
+      
+      const redirectResponse = NextResponse.redirect(dashboardUrl);
+      // Copy refreshed session cookies to the redirect response
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, {
+          path: cookie.path,
+          domain: cookie.domain,
+          maxAge: cookie.maxAge,
+          secure: cookie.secure,
+          httpOnly: cookie.httpOnly,
+          sameSite: cookie.sameSite,
+        });
+      });
+      return redirectResponse;
     }
   }
 
@@ -38,13 +60,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     * - public folder assets (images, models, etc.)
-     */
     '/((?!_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|glb|gltf)$).*)',
   ],
 };

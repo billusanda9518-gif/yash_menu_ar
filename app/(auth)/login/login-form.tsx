@@ -37,25 +37,32 @@ export default function LoginForm() {
       return;
     }
 
+    console.log("loading started");
     setLoading(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log("auth state", data.session);
+
       if (error) {
+        console.error("[LoginForm] signInWithPassword database error:", error.message);
         showToast.error(error.message);
         return;
       }
 
+      console.log("redirecting to dashboard");
       showToast.success("Welcome back!");
       router.push(redirectTo);
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("[LoginForm] signInWithPassword unexpected error:", err);
       showToast.error("An unexpected error occurred");
     } finally {
+      console.log("loading finished");
       setLoading(false);
     }
   }

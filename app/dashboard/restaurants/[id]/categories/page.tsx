@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, ArrowLeft, GripVertical } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/header";

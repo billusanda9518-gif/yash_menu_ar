@@ -29,58 +29,101 @@ export function useAuth(): UseAuthReturn {
 
   const fetchProfile = useCallback(
     async (userId: string) => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      console.log(`[useAuth] fetchProfile starting for user: ${userId}`);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error.message);
+        if (error) {
+          console.error('[useAuth] fetchProfile database error:', error.message);
+          setProfile(null);
+          return;
+        }
+
+        console.log('[useAuth] fetchProfile profile loaded successfully:', data);
+        setProfile(data as Profile);
+      } catch (err) {
+        console.error('[useAuth] fetchProfile unexpected error:', err);
         setProfile(null);
-        return;
       }
-
-      setProfile(data as Profile);
     },
     [supabase],
   );
 
   useEffect(() => {
+    console.log('[useAuth] useEffect: auth provider initialization started');
+    let active = true;
+
     // Get the initial session
     const initSession = async () => {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
+      console.log("loading started");
+      try {
+        const {
+          data: { user: currentUser },
+          error,
+        } = await supabase.auth.getUser();
 
-      setUser(currentUser);
+        if (error) {
+          console.warn('[useAuth] initSession getUser returned error:', error.message);
+        }
 
-      if (currentUser) {
-        await fetchProfile(currentUser.id);
+        if (active) {
+          console.log("auth state", currentUser);
+          setUser(currentUser);
+
+          if (currentUser) {
+            await fetchProfile(currentUser.id);
+          }
+        }
+      } catch (err) {
+        console.error('[useAuth] initSession unexpected error:', err);
+      } finally {
+        if (active) {
+          console.log("loading finished");
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     };
 
     initSession();
 
     // Listen for auth state changes
+    console.log('[useAuth] subscribing to onAuthStateChange');
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("loading started");
       const currentUser = session?.user ?? null;
-      setUser(currentUser);
-
-      if (currentUser) {
-        await fetchProfile(currentUser.id);
-      } else {
-        setProfile(null);
+      
+      if (active) {
+        console.log("auth state", session);
+        setUser(currentUser);
       }
 
-      setLoading(false);
+      try {
+        if (currentUser) {
+          await fetchProfile(currentUser.id);
+        } else {
+          if (active) {
+            setProfile(null);
+          }
+        }
+      } catch (err) {
+        console.error('[useAuth] onAuthStateChange profile fetch error:', err);
+      } finally {
+        if (active) {
+          console.log("loading finished");
+          setLoading(false);
+        }
+      }
     });
 
     return () => {
+      console.log('[useAuth] cleaning up auth state listener');
+      active = false;
       subscription.unsubscribe();
     };
   }, [supabase, fetchProfile]);

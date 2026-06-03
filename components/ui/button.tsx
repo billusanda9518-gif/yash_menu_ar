@@ -100,7 +100,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     /* ---- asChild: clone props onto the single child element ---- */
     if (asChild && React.isValidElement(children)) {
-      const child = children as React.ReactElement<{ className?: string }>;
+      const child = children as React.ReactElement<any>;
       return React.cloneElement(child, {
         className: cn(
           classes,
@@ -110,7 +110,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled: isDisabled,
         'aria-disabled': isDisabled || undefined,
         ...props,
-      });
+      } as any);
     }
 
     return (
