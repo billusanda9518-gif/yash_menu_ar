@@ -29,15 +29,25 @@ export default function NewRestaurantPage() {
   useEffect(() => {
     async function checkLimit() {
       if (!user) return;
-      const supabase = createClient();
-      const { count } = await supabase
-        .from("restaurants")
-        .select("id", { count: "exact", head: true })
-        .eq("owner_id", user.id);
-      const currentCount = count || 0;
-      setRestaurantCount(currentCount);
-      if (!canCreateRestaurant(currentCount)) {
-        setAtLimit(true);
+      try {
+        const supabase = createClient();
+        const { count, error } = await supabase
+          .from("restaurants")
+          .select("id", { count: "exact", head: true })
+          .eq("owner_id", user.id);
+        
+        if (error) {
+          console.error("Database error in checkLimit:", error.message);
+          return;
+        }
+
+        const currentCount = count || 0;
+        setRestaurantCount(currentCount);
+        if (!canCreateRestaurant(currentCount)) {
+          setAtLimit(true);
+        }
+      } catch (err) {
+        console.error("Unexpected error checking restaurant limit:", err);
       }
     }
     if (!subLoading && user) {

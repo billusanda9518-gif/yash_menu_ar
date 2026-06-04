@@ -53,70 +53,26 @@ export function useAuth(): UseAuthReturn {
     [supabase],
   );
 
+  // 1. Subscribe to auth state changes. Keep callback synchronous!
   useEffect(() => {
-    console.log('[useAuth] useEffect: auth provider initialization started');
+    console.log('[useAuth] useEffect: subscribing to onAuthStateChange');
     let active = true;
 
-    // Get the initial session
-    const initSession = async () => {
-      console.log("loading started");
-      try {
-        const {
-          data: { user: currentUser },
-          error,
-        } = await supabase.auth.getUser();
-
-        if (error) {
-          console.warn('[useAuth] initSession getUser returned error:', error.message);
-        }
-
-        if (active) {
-          console.log("auth state", currentUser);
-          setUser(currentUser);
-
-          if (currentUser) {
-            await fetchProfile(currentUser.id);
-          }
-        }
-      } catch (err) {
-        console.error('[useAuth] initSession unexpected error:', err);
-      } finally {
-        if (active) {
-          console.log("loading finished");
-          setLoading(false);
-        }
-      }
-    };
-
-    initSession();
-
-    // Listen for auth state changes
-    console.log('[useAuth] subscribing to onAuthStateChange');
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("loading started");
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("onAuthStateChange event:", event);
       const currentUser = session?.user ?? null;
       
       if (active) {
-        console.log("auth state", session);
+        console.log("auth state changed user ID:", currentUser?.id);
         setUser(currentUser);
-      }
-
-      try {
-        if (currentUser) {
-          await fetchProfile(currentUser.id);
-        } else {
-          if (active) {
-            setProfile(null);
-          }
-        }
-      } catch (err) {
-        console.error('[useAuth] onAuthStateChange profile fetch error:', err);
-      } finally {
-        if (active) {
-          console.log("loading finished");
+        
+        // If there's no user, clear profile and end loading immediately.
+        if (!currentUser) {
+          setProfile(null);
           setLoading(false);
+          console.log("loading finished - no user session");
         }
       }
     });
@@ -126,7 +82,34 @@ export function useAuth(): UseAuthReturn {
       active = false;
       subscription.unsubscribe();
     };
-  }, [supabase, fetchProfile]);
+  }, [supabase]);
+
+  // 2. Fetch profile asynchronously when user state changes
+  useEffect(() => {
+    let active = true;
+    if (!user) return;
+
+    const fetchUserProfile = async () => {
+      console.log("loading started");
+      setLoading(true);
+      try {
+        await fetchProfile(user.id);
+      } catch (err) {
+        console.error('[useAuth] fetchUserProfile error:', err);
+      } finally {
+        if (active) {
+          console.log("loading finished - profile fetch complete");
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUserProfile();
+
+    return () => {
+      active = false;
+    };
+  }, [user, fetchProfile]);
 
   const signIn = useCallback(
     async (email: string, password: string) => {

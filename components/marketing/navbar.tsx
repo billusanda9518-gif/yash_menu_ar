@@ -80,21 +80,20 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 md:flex">
-          {isLoggedIn ? (
+          <Link href={ROUTES.LOGIN}>
+            <Button variant="ghost" size="sm">
+              Log in
+            </Button>
+          </Link>
+          <Link href={ROUTES.SIGNUP}>
+            <Button size="sm">Get Started</Button>
+          </Link>
+          {isLoggedIn && (
             <Link href="/dashboard">
-              <Button size="sm">Dashboard</Button>
+              <Button size="sm" variant="outline">
+                Dashboard
+              </Button>
             </Link>
-          ) : (
-            <>
-              <Link href={ROUTES.LOGIN}>
-                <Button variant="ghost" size="sm">
-                  Log in
-                </Button>
-              </Link>
-              <Link href={ROUTES.SIGNUP}>
-                <Button size="sm">Get Started</Button>
-              </Link>
-            </>
           )}
         </div>
 
@@ -123,21 +122,20 @@ export function Navbar() {
               </a>
             ))}
             <div className="flex flex-col gap-2 pt-4 border-t border-zinc-800/60">
-              {isLoggedIn ? (
+              <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
+                <Button variant="outline" className="w-full">
+                  Log in
+                </Button>
+              </Link>
+              <Link href={ROUTES.SIGNUP} onClick={() => setMobileOpen(false)}>
+                <Button className="w-full">Get Started</Button>
+              </Link>
+              {isLoggedIn && (
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full">Dashboard</Button>
+                  <Button variant="ghost" className="w-full">
+                    Dashboard
+                  </Button>
                 </Link>
-              ) : (
-                <>
-                  <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full">
-                      Log in
-                    </Button>
-                  </Link>
-                  <Link href={ROUTES.SIGNUP} onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full">Get Started</Button>
-                  </Link>
-                </>
               )}
             </div>
           </div>
