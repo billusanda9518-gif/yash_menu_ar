@@ -74,6 +74,7 @@ export default function NewDishPage({ params }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    console.log("form submitted");
     setErrors({});
 
     const parsed = createDishSchema.safeParse({
@@ -83,6 +84,7 @@ export default function NewDishPage({ params }: Props) {
     });
 
     if (!parsed.success) {
+      console.log("validation failed:", parsed.error.issues);
       const fieldErrors: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
         if (issue.path[0]) fieldErrors[issue.path[0] as string] = issue.message;
@@ -91,8 +93,13 @@ export default function NewDishPage({ params }: Props) {
       return;
     }
 
-    if (!user) return;
+    console.log("validation passed");
+    if (!user) {
+      console.log("no user found");
+      return;
+    }
     setLoading(true);
+    console.log("creating dish");
 
     try {
       const supabase = createClient();
@@ -120,6 +127,7 @@ export default function NewDishPage({ params }: Props) {
         modelUrl = urlData.publicUrl;
       }
 
+      console.log("supabase insert starting");
       const { error } = await supabase.from("dishes").insert({
         restaurant_id: restaurantId,
         category_id: form.category_id || null,
@@ -136,6 +144,7 @@ export default function NewDishPage({ params }: Props) {
       });
 
       if (error) throw error;
+      console.log("supabase insert finished");
       showToast.success("Dish created!");
       router.push(`/dashboard/restaurants/${restaurantId}/menu`);
     } catch (err) {
@@ -258,7 +267,7 @@ export default function NewDishPage({ params }: Props) {
 
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
-            <Button type="submit" loading={loading}>Create Dish</Button>
+            <Button type="submit" loading={loading} onClick={() => console.log("button clicked")}>Create Dish</Button>
           </div>
         </form>
       </div>

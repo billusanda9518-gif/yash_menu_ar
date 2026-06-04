@@ -18,7 +18,11 @@ export const createDishSchema = z.object({
     .min(0, { error: 'Price must be zero or positive.' })
     .max(99999.99, { error: 'Price is too high.' }),
   currency: z.string().length(3, { error: 'Currency code must be 3 characters.' }).default('USD'),
-  category_id: z.string().uuid({ error: 'A valid category is required.' }),
+  category_id: z
+    .string()
+    .uuid({ error: 'A valid category is required.' })
+    .optional()
+    .nullable(),
   is_available: z.boolean().default(true),
   is_featured: z.boolean().default(false),
   allergens: z.array(z.string()).default([]),
