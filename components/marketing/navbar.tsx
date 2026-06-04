@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP_NAME, ROUTES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -15,6 +16,7 @@ const navLinks = [
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     function onScroll() {
@@ -22,6 +24,13 @@ export function Navbar() {
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
   }, []);
 
   function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
@@ -71,14 +80,22 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 md:flex">
-          <Link href={ROUTES.LOGIN}>
-            <Button variant="ghost" size="sm">
-              Log in
-            </Button>
-          </Link>
-          <Link href={ROUTES.SIGNUP}>
-            <Button size="sm">Get Started</Button>
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard">
+              <Button size="sm">Dashboard</Button>
+            </Link>
+          ) : (
+            <>
+              <Link href={ROUTES.LOGIN}>
+                <Button variant="ghost" size="sm">
+                  Log in
+                </Button>
+              </Link>
+              <Link href={ROUTES.SIGNUP}>
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -106,14 +123,22 @@ export function Navbar() {
               </a>
             ))}
             <div className="flex flex-col gap-2 pt-4 border-t border-zinc-800/60">
-              <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full">
-                  Log in
-                </Button>
-              </Link>
-              <Link href={ROUTES.SIGNUP} onClick={() => setMobileOpen(false)}>
-                <Button className="w-full">Get Started</Button>
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full">Dashboard</Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link href={ROUTES.SIGNUP} onClick={() => setMobileOpen(false)}>
+                    <Button className="w-full">Get Started</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -121,3 +146,4 @@ export function Navbar() {
     </header>
   );
 }
+
