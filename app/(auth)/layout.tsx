@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { UtensilsCrossed } from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -21,10 +20,11 @@ export default function AuthLayout({
             href="/"
             className="inline-flex items-center gap-2 text-2xl font-bold text-white transition-colors hover:text-orange-400"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500">
-              <UtensilsCrossed className="h-5 w-5 text-white" />
-            </div>
-            ARMenu
+            <img
+              src="/logo.png"
+              alt="AR Menu Logo"
+              className="h-10 w-auto"
+            />
           </Link>
         </div>
 

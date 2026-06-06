@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Utensils } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
@@ -55,12 +55,11 @@ export function Navbar() {
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href={ROUTES.HOME} className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500 transition-transform duration-200 group-hover:scale-105">
-            <Utensils className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            {APP_NAME}
-          </span>
+          <img
+            src="/logo.png"
+            alt="AR Menu Logo"
+            className="h-8 w-auto transition-transform duration-200 group-hover:scale-105"
+          />
         </Link>
 
         {/* Desktop nav */}

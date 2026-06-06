@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  UtensilsCrossed,
   LayoutDashboard,
   Store,
   BarChart3,
@@ -60,16 +59,13 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-zinc-800 px-4">
           {!collapsed && (
             <Link href="/dashboard" className="flex items-center gap-2 font-bold text-white">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-                <UtensilsCrossed className="h-4 w-4 text-white" />
-              </div>
-              <span>ARMenu</span>
+              <img src="/logo.png" alt="AR Menu Logo" className="h-8 w-auto" />
             </Link>
           )}
           {collapsed && (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-              <UtensilsCrossed className="h-4 w-4 text-white" />
-            </div>
+            <Link href="/dashboard" className="mx-auto flex h-8 w-8 items-center justify-center">
+              <img src="/logo-icon.png" alt="Logo Icon" className="h-8 w-8" />
+            </Link>
           )}
           <button
             onClick={onClose}

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Utensils } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 
 const footerLinks = {
@@ -65,12 +64,11 @@ export function Footer() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500 transition-transform duration-200 group-hover:scale-105">
-                <Utensils className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-white">
-                {APP_NAME}
-              </span>
+              <img
+                src="/logo.png"
+                alt="AR Menu Logo"
+                className="h-8 w-auto transition-transform duration-200 group-hover:scale-105"
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-500">
               Transform your restaurant with AR-enabled digital menus. Let
